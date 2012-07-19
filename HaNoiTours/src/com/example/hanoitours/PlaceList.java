@@ -2,8 +2,8 @@ package com.example.hanoitours;
 
 import java.util.ArrayList;
 
-import android.app.AlertDialog;
-import android.content.Context;
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 
 import com.google.android.maps.ItemizedOverlay;
@@ -11,9 +11,9 @@ import com.google.android.maps.OverlayItem;
 
 public class PlaceList extends ItemizedOverlay<OverlayItem> {
 	private ArrayList<OverlayItem> mOverlays = new ArrayList<OverlayItem>();
-	Context mContext;
+	Activity mContext;
 
-	public PlaceList(Drawable defaultMarker, Context context) {
+	public PlaceList(Drawable defaultMarker, Activity context) {
 		super(boundCenterBottom(defaultMarker));
 		mContext = context;
 	}
@@ -31,10 +31,8 @@ public class PlaceList extends ItemizedOverlay<OverlayItem> {
 	@Override
 	protected boolean onTap(int index) {
 		OverlayItem item = mOverlays.get(index);
-		AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
-		dialog.setTitle(item.getTitle());
-		dialog.setMessage(item.getSnippet());
-		dialog.show();
+    	Intent intent = new Intent(mContext, PlaceDetail.class);
+    	mContext.startActivity(intent);
 		return true;
 	}
 	

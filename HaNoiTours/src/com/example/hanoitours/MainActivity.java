@@ -7,36 +7,52 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
-import com.google.android.maps.OverlayItem;
 
 public class MainActivity extends MapActivity {
 	List<Overlay> mapOverlays;
+	MapView map;
+	MyLocationOverlay location;
+
+	private class TrackLocation implements Runnable{
+		public TrackLocation() {
+		}
+		
+		public void run(){
+			map.getController().animateTo(location.getMyLocation());
+		}
+    }
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
-        MapView map = (MapView) findViewById(R.id.mapview);
+        map = (MapView) findViewById(R.id.mapview);
         map.setBuiltInZoomControls(true);
         configMap(map);
-        
+            
         mapOverlays = map.getOverlays();
+
         Drawable drawable = this.getResources().getDrawable(R.drawable.androidmarker);
         PlaceList itemizedoverlay = new PlaceList(drawable, this);
-        GeoPoint point = new GeoPoint(19240000,-99120000);
-        OverlayItem overlayitem = new OverlayItem(point, "Hola, Mundo!", "I'm in Mexico City!");
-        itemizedoverlay.addOverlay(overlayitem);
         mapOverlays.add(itemizedoverlay);
+
+        GeoPoint point = new GeoPoint(21631899,105297546);
+        Place overlayitem = new Place(point, "aaa", "bbb");
+        itemizedoverlay.addOverlay(overlayitem);
         
-        MyLocationOverlay location = new MyLocationOverlay(this, map);
-        location.enableMyLocation();
+        location = new MyLocationOverlay(this, map);
+        mapOverlays.add(location);
+        
+        map.getController().setCenter(point);
+        map.getController().setZoom(10);
     }
     
     @Override
@@ -67,10 +83,23 @@ public class MainActivity extends MapActivity {
     	super.onResume();
     	MapView map = (MapView) findViewById(R.id.mapview);
     	configMap(map);
+    	location.enableCompass();
+    	location.enableMyLocation();
+    }
+    
+    @Override
+    protected void onPause(){
+    	super.onPause();
+    	location.disableCompass();
+    	location.disableMyLocation();
     }
     
     private void configMap(MapView map) {
 		map.setSatellite(Setting.satelline);
 		map.setTraffic(Setting.traffic);		
 	}
+    
+    public void getLocation(View view){
+        location.runOnFirstFix(new TrackLocation());
+    }
 }

@@ -7,5 +7,7 @@
     <string name="title_activity_setting">SettingActivity</string>
     <string name="Satelline">Satelline</string>
     <string name="Traffic">Traffic</string>
+    <string name="title_activity_place_detail">PlaceDetail</string>
+    <string name="location">0</string>
     
 </resources>
