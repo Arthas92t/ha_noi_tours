@@ -50,8 +50,6 @@ public class DownloadListTask extends AsyncTask <String, Place, Integer>{
 						place.getString(ID), place.getString(NAME), point));
 			}
 		}catch(Exception e){
-			int a = 0;
-			a = a /a;
 		}
 	}
 }
