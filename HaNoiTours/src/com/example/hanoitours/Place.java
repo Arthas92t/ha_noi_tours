@@ -5,10 +5,11 @@ import com.google.android.maps.OverlayItem;
 
 public class Place extends OverlayItem {
 	
-	String name;
-	String point;
+	public String name;
+	public String id;
 	public Place(String id, String name, GeoPoint point) {
 		super(point, "", "");
-		
+		this.name = name;
+		this.id = id;
 	}
 }

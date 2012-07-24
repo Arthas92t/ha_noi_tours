@@ -9,5 +9,6 @@
     <string name="Traffic">Traffic</string>
     <string name="title_activity_place_detail">PlaceDetail</string>
     <string name="location">0</string>
+    <string name="place_name">place_name</string>
     
 </resources>

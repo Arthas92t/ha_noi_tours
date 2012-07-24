@@ -1,5 +1,8 @@
 package com.example.hanoitours;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -15,8 +18,8 @@ import com.google.android.maps.GeoPoint;
 public class DownloadListTask extends AsyncTask <String, Place, Integer>{
 	
 	private final int BASE = 1000000;
-	private final String ID = "ID";
-	private final String NAME = "NAME";
+	private final String ID = "id";
+	private final String NAME = "name";
 	
 	PlaceList itemizedoverlay;
 	
@@ -39,13 +42,16 @@ public class DownloadListTask extends AsyncTask <String, Place, Integer>{
 		try{
 			response = client.execute(httpget);
 			HttpEntity entity = response.getEntity();
-			String obj = new String(entity.toString().getBytes(), "UTF16");
-			JSONArray list= new JSONArray(obj);
+			
+			//need to be edited
+			JSONArray list= new JSONArray((new BufferedReader(
+					new InputStreamReader(entity.getContent()))).readLine());
+			
 			for(int i = 0; i < list.length(); i++){
 				JSONObject place = list.getJSONObject(i);
-				GeoPoint point = new GeoPoint(
-						(int)(place.getInt("latitude") * BASE),
-						(int)(place.getInt("longitude") * BASE)); 
+				int x = (int)(place.getDouble("latitude") * BASE);
+				int y = (int)(place.getDouble("longitude") * BASE);
+				GeoPoint point = new GeoPoint(x, y); 
 				itemizedoverlay.addOverlay(new Place(
 						place.getString(ID), place.getString(NAME), point));
 			}
