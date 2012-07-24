@@ -16,9 +16,13 @@ import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 
 public class MainActivity extends MapActivity {
+	
+	private final String URl_LIST_PLACE = "http://hanoitour.herokuapp.com/places.json";
+	
 	List<Overlay> mapOverlays;
 	MapView map;
 	MyLocationOverlay location;
+	PlaceList itemizedoverlay;
 
 	private class TrackLocation implements Runnable{
 		public TrackLocation() {
@@ -41,11 +45,11 @@ public class MainActivity extends MapActivity {
         mapOverlays = map.getOverlays();
 
         Drawable drawable = this.getResources().getDrawable(R.drawable.androidmarker);
-        PlaceList itemizedoverlay = new PlaceList(drawable, this);
+        itemizedoverlay = new PlaceList(drawable, this);
         mapOverlays.add(itemizedoverlay);
 
         GeoPoint point = new GeoPoint(21631899,105297546);
-        Place overlayitem = new Place(point, "aaa", "bbb");
+        Place overlayitem = new Place("aaa", "bbb", point);
         itemizedoverlay.addOverlay(overlayitem);
         
         location = new MyLocationOverlay(this, map);
@@ -53,6 +57,7 @@ public class MainActivity extends MapActivity {
         
         map.getController().setCenter(point);
         map.getController().setZoom(10);
+        (new DownloadListTask(itemizedoverlay)).execute(URl_LIST_PLACE);
     }
     
     @Override

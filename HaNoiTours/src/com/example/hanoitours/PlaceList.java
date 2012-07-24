@@ -10,7 +10,7 @@ import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.OverlayItem;
 
 public class PlaceList extends ItemizedOverlay<OverlayItem> {
-	private ArrayList<OverlayItem> mOverlays = new ArrayList<OverlayItem>();
+	private ArrayList<Place> mOverlays = new ArrayList<Place>();
 	Activity mContext;
 
 	public PlaceList(Drawable defaultMarker, Activity context) {
@@ -30,13 +30,13 @@ public class PlaceList extends ItemizedOverlay<OverlayItem> {
 	
 	@Override
 	protected boolean onTap(int index) {
-		OverlayItem item = mOverlays.get(index);
+		Place item = mOverlays.get(index);
     	Intent intent = new Intent(mContext, PlaceDetail.class);
     	mContext.startActivity(intent);
 		return true;
 	}
 	
-	public void addOverlay(OverlayItem overlay) {
+	public void addOverlay(Place overlay) {
 		mOverlays.add(overlay);
 		populate();
 	}
