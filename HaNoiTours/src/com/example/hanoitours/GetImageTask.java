@@ -1,18 +1,13 @@
 package com.example.hanoitours;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import android.R.drawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -20,10 +15,6 @@ import android.util.Log;
 public class GetImageTask extends AsyncTask <String, Integer, Drawable>{
 
 	private String TAG ="GetPlaceInfoTask";
-	private String NAME = "name";
-	private String ADDRESS = "address";
-	private String IMAGE = "image";
-	private String INFO = "info";
 	
 	private PlaceDetail currentActivity;
 	

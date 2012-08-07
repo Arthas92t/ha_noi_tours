@@ -1,16 +1,24 @@
 package com.example.hanoitours;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
+import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
@@ -34,7 +42,39 @@ public class MainActivity extends MapActivity {
 		}
     }
 	
-    @Override
+	public void changeMap(String area){
+		MapView mapView =(MapView) findViewById(R.id.mapview);
+		MapController mc = mapView.getController();
+		
+		GeoPoint myLocation = null;
+		double lat = 0;
+		double lng = 0;
+		try{
+			Geocoder g = new Geocoder(this, Locale.getDefault());
+			java.util.List<android.location.Address> result=g.getFromLocationName(area , 1);
+			if(result.size() > 0){
+				Toast.makeText(MainActivity.this, "Country: " + String.valueOf(result.get(0).getCountryName()) , Toast.LENGTH_SHORT).show();
+				lat= result.get(0).getLatitude();
+				lng= result.get(0).getLongitude();
+			}
+			else{
+				Toast.makeText(MainActivity.this, "not found", Toast.LENGTH_SHORT).show();
+				return;
+			}
+		}
+		catch(IOException io){
+			Toast.makeText(MainActivity.this, "Connection Error", Toast.LENGTH_SHORT).show();
+		}
+		myLocation = new GeoPoint(
+				(int) (lat * 1E6),
+				(int) (lng * 1E6)
+				);
+		mc.animateTo(myLocation);
+		mc.setZoom(12);
+		mapView.invalidate();
+	}
+
+	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -57,7 +97,29 @@ public class MainActivity extends MapActivity {
         map.getController().setZoom(10);
         getPlaceListTask = new GetPlaceListTask(itemizedoverlay);
         getPlaceListTask.execute(URl_LIST_PLACE);
-    }
+
+        Button SearchButton = (Button) findViewById(R.id.button1);
+        SearchButton.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				EditText textSearch = (EditText) findViewById(R.id.editText1);
+				String area = textSearch.getText().toString();
+				MainActivity.this.changeMap(area);
+			}
+		});
+        
+        Button M =(Button) findViewById(R.id.button2);
+        M.setOnClickListener(new OnClickListener() {
+			
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				startActivity(new Intent(getApplicationContext(),SettingActivity.class));
+			}
+		});
+        
+	
+	}
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

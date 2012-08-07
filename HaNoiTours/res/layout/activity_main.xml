@@ -11,10 +11,36 @@
 	    android:apiKey="0I8aV--TfeSVO9hA-X12DpPMwDlI4OJddcjeF1Q"
 	/>
     <Button 
+        android:id="@+id/location"
         android:text="@string/location"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="getLocation"/>
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/location"
+        android:layout_alignParentTop="true"
+        android:text="@string/menu_settings" />
+    
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@id/button2"
+        android:text="@string/search" />
+    
+    <EditText
+        android:id="@+id/editText1"
+        android:layout_toLeftOf="@id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"/>
+
 </RelativeLayout>
