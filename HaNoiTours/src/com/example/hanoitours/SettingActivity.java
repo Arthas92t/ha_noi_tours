@@ -20,7 +20,7 @@ public class SettingActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        return true;
+        return false;
     }
     
     public void setSatelline(View view){

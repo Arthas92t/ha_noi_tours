@@ -19,10 +19,11 @@ public class MainActivity extends MapActivity {
 	
 	private final String URl_LIST_PLACE = "http://hanoitour.herokuapp.com/places.json";
 	
-	List<Overlay> mapOverlays;
-	MapView map;
-	MyLocationOverlay location;
-	PlaceList itemizedoverlay;
+	private List<Overlay> mapOverlays;
+	private MapView map;
+	private MyLocationOverlay location;
+	private PlaceList itemizedoverlay;
+	private GetPlaceListTask getPlaceListTask;
 
 	private class TrackLocation implements Runnable{
 		public TrackLocation() {
@@ -37,7 +38,6 @@ public class MainActivity extends MapActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
         map = (MapView) findViewById(R.id.mapview);
         map.setBuiltInZoomControls(true);
         configMap(map);
@@ -49,15 +49,14 @@ public class MainActivity extends MapActivity {
         mapOverlays.add(itemizedoverlay);
 
         GeoPoint point = new GeoPoint(21631899,105297546);
-        Place overlayitem = new Place("aaa", "bbb", point);
-        itemizedoverlay.addOverlay(overlayitem);
         
         location = new MyLocationOverlay(this, map);
         mapOverlays.add(location);
         
         map.getController().setCenter(point);
         map.getController().setZoom(10);
-        (new DownloadListTask(itemizedoverlay)).execute(URl_LIST_PLACE);
+        getPlaceListTask = new GetPlaceListTask(itemizedoverlay);
+        getPlaceListTask.execute(URl_LIST_PLACE);
     }
     
     @Override

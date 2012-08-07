@@ -10,38 +10,36 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class GetPlaceInfoTask extends AsyncTask <String, Integer, PlaceInfo>{
+import com.google.android.maps.GeoPoint;
 
-	private String TAG ="GetPlaceInfoTask";
-	private String NAME = "name";
-	private String ADDRESS = "address";
-	private String IMAGE = "image";
-	private String INFO = "info";
+public class GetPlaceListTask extends AsyncTask <String, Place, Integer>{
 	
-	private PlaceDetail currentActivity;
+	private String TAG ="DownloadListTask";
+	private final int BASE = 1000000;
+	private final String ID = "id";
+	private final String NAME = "name";
 	
-	public GetPlaceInfoTask(PlaceDetail activity) {
+	PlaceList itemizedoverlay;
+	
+	public GetPlaceListTask(PlaceList itemizedoverlay) {
 		super();
-		this.currentActivity = activity;
+		this.itemizedoverlay = itemizedoverlay;
 	}
 
 	@Override
-	protected PlaceInfo doInBackground(String... arg0) {
-		return download(arg0[0]);
+	protected Integer doInBackground(String... url) {
+		for(int i = 0; i < url.length; i++)
+			download(url[i]);
+		return null;
 	}
-	
-	@Override
-	protected void onPostExecute(PlaceInfo result) {
-		currentActivity.updateUI(result);
-//		(new LoadImageTask(currentActivity)).execute(result.image);
-	}
-	
+
 	private String streamToString(InputStream input){
 		BufferedReader buffer = new BufferedReader(new InputStreamReader(input));
         String content = "";
@@ -62,7 +60,7 @@ public class GetPlaceInfoTask extends AsyncTask <String, Integer, PlaceInfo>{
         return content;
 	}
 	
-	private PlaceInfo download(String url){
+	private void download(String url){
 		HttpClient client = new DefaultHttpClient();
 		HttpGet httpget = new HttpGet(url);
 		HttpResponse response;
@@ -71,16 +69,32 @@ public class GetPlaceInfoTask extends AsyncTask <String, Integer, PlaceInfo>{
 			HttpEntity entity = response.getEntity();
 			
 			//need to be edited
-			JSONObject place = new JSONObject(
+			JSONArray list= new JSONArray(
 					this.streamToString(entity.getContent()));
-			return new PlaceInfo(
-					place.getString(NAME), place.getString(ADDRESS),
-					place.getString(IMAGE), place.getString(INFO));
+			
+			for(int i = 0; i < list.length(); i++){
+				JSONObject place = list.getJSONObject(i);
+				
+				if(place == null){
+					Log.e(TAG, "place at " + i +" is null");
+					continue;
+				}
+				Double xFloat = place.getDouble("latitude");
+				Double yFloat = place.getDouble("longitude");
+				if(xFloat == null || yFloat == null){
+					Log.e(TAG, "place at " + i +" is null");
+					continue;
+				}
+				int x = (int)( xFloat * BASE);
+				int y = (int)( yFloat * BASE);
+				GeoPoint point = new GeoPoint(x, y); 
+				itemizedoverlay.addOverlay(new Place(
+						place.getString(ID), place.getString(NAME), point));
+			}
 		}catch(JSONException e){
 			Log.e(TAG, "JSONException " + e);
 		}catch(IOException e){
 			Log.e(TAG, "IOException " + e);			
 		}
-		return null;
 	}
 }
