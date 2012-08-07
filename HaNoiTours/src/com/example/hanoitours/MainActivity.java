@@ -7,6 +7,7 @@ import java.util.Locale;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.location.Geocoder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -117,8 +118,6 @@ public class MainActivity extends MapActivity {
 				startActivity(new Intent(getApplicationContext(),SettingActivity.class));
 			}
 		});
-        
-	
 	}
     
     @Override

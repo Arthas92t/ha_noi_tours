@@ -3,11 +3,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
     
+    <CheckBox
+        android:id="@+id/mark_place"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content"
+        android:onClick="mark"/>
+    
     <ImageView
         android:id = "@+id/place_image"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_below="@id/mark_place"
         />
     <TextView
         android:layout_width="wrap_content"

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -47,5 +48,9 @@ public class PlaceDetail extends Activity {
     public void updateImage(Drawable image){
     	ImageView imageView = (ImageView) findViewById(R.id.place_image);
     	imageView.setBackgroundDrawable(image);
+    }
+    
+    public void mark(View view){
+        
     }
 }
