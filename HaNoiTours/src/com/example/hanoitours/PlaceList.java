@@ -16,6 +16,7 @@ public class PlaceList extends ItemizedOverlay<OverlayItem> {
 	public PlaceList(Drawable defaultMarker, Activity context) {
 		super(boundCenterBottom(defaultMarker));
 		mContext = context;
+		populate();
 	}
 
 	@Override

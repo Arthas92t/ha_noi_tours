@@ -11,7 +11,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -20,29 +19,29 @@ import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 
-public class GetDirectionsTask extends AsyncTask <GeoPoint[], Integer, ArrayList<GeoPoint>>{
+public class GetDirectionsTask extends AsyncTask <ArrayList<GeoPoint>, Integer, ArrayList<GeoPoint>>{
 
 	private String TAG ="GetPlaceInfoTask";
 	
 	private String URL = "http://maps.googleapis.com/maps/api/directions/json?origin=";
-	private String STEPS = "steps";
-	private String LEGS = "legs";
+	private String ROUTES = "routes";
 	private int BASE = 1000000;
 	
-	private PlaceDetail currentActivity;
+	private MainActivity currentActivity;
 	
-	public GetDirectionsTask(PlaceDetail activity) {
+	public GetDirectionsTask(MainActivity activity) {
 		super();
 		this.currentActivity = activity;
 	}
 
 	@Override
-	protected ArrayList<GeoPoint> doInBackground(GeoPoint[]... arg0) {
-		return getDirections(requestDirections(makeUrl(arg0[0])));
+	protected ArrayList<GeoPoint> doInBackground(ArrayList<GeoPoint>... arg0) {
+		return decodePoly(getDirections(requestDirections(makeUrl(arg0[0]))));
 	}
 	
 	@Override
 	protected void onPostExecute(ArrayList<GeoPoint> result) {
+		currentActivity.draw(result);
 	}
 	
 	private String streamToString(InputStream input){
@@ -65,26 +64,26 @@ public class GetDirectionsTask extends AsyncTask <GeoPoint[], Integer, ArrayList
         return content;
 	}
 	
-	private double reFloatE6(int x){
+	private Double reFloatE6(int x){
 		return ((double)x)/BASE;
 	}
 	
 	private String pointToString(GeoPoint point){
 		String result = "";
-		result = result + reFloatE6(point.getLatitudeE6())
-				+ ", " + reFloatE6(point.getLongitudeE6());
+		result = result + reFloatE6(point.getLatitudeE6()).toString()
+				+ "," + reFloatE6(point.getLongitudeE6()).toString();
 		return result;
 	}
 	
-	private String makeUrl(GeoPoint listPoint[]){
-		if (listPoint.length < 2)
+	private String makeUrl(ArrayList<GeoPoint> arg0){
+		if (arg0.size() < 2)
 				return null;
-		String url = URL + pointToString(listPoint[0])
-				+ "&destination=" + pointToString(listPoint[1])
+		String url = URL + pointToString(arg0.get(0))
+				+ "&destination=" + pointToString(arg0.get(1))
 				+ "&waypoints=optimize:true";
-		for(int i = 2; i < listPoint.length; i++)
-			url = url + "|" + pointToString(listPoint[i]);
-		url = url + "&sensor=true&mode=driving";
+		for(int i = 2; i < arg0.size(); i++)
+			url = url + "|" + pointToString(arg0.get(i));
+		url = url + "&sensor=false&mode=driving";
 		return url;
 	}
 	
@@ -108,38 +107,49 @@ public class GetDirectionsTask extends AsyncTask <GeoPoint[], Integer, ArrayList
 		return null;
 	}
 	
-	private GeoPoint JSONToGeoPoint(JSONObject step, String key){
-		try{
-			double x = step.getJSONObject(key).getDouble("lat");
-			double y = step.getJSONObject(key).getDouble("lng");
-			return new GeoPoint((int) x * BASE,
-					(int) y * BASE);
-		}catch(Exception e){
-			
-		}
-		return null;
-	}
-	
-	private ArrayList<GeoPoint> getDirections(JSONObject direction){
+	private String getDirections(JSONObject direction){
 		if(direction == null)
 			return null;
 		try{
-			ArrayList<GeoPoint> result= new ArrayList<GeoPoint>();
-			JSONArray legs = direction.getJSONArray(LEGS);
-			
-			for(int i = 0; i < legs.length(); i++){
-				
-				JSONArray steps = legs.getJSONObject(i).getJSONArray(STEPS);
-				
-				for(int j = 0; j < steps.length(); j++){
-					result.add(JSONToGeoPoint(steps.getJSONObject(j),"start_location"));
-					result.add(JSONToGeoPoint(steps.getJSONObject(j),"end_location"));
-				}
-			}
-			return result;
-		}catch(Exception e){
-			
+			JSONObject Polyline = direction.getJSONArray(ROUTES).getJSONObject(0).getJSONObject("overview_polyline");
+			return Polyline.getString("points");
+		}catch(JSONException e){
+			Log.e(TAG, "JSONException " + e);
 		}
 		return null;
+	}
+
+	private ArrayList<GeoPoint> decodePoly(String encoded) {
+
+	    ArrayList<GeoPoint> poly = new ArrayList<GeoPoint>();
+	    int index = 0, len = encoded.length();
+	    int lat = 0, lng = 0;
+
+	    while (index < len) {
+	        int b, shift = 0, result = 0;
+	        do {
+	            b = encoded.charAt(index++) - 63;
+	            result |= (b & 0x1f) << shift;
+	            shift += 5;
+	        } while (b >= 0x20);
+	        int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+	        lat += dlat;
+
+	        shift = 0;
+	        result = 0;
+	        do {
+	            b = encoded.charAt(index++) - 63;
+	            result |= (b & 0x1f) << shift;
+	            shift += 5;
+	        } while (b >= 0x20);
+	        int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+	        lng += dlng;
+
+	        GeoPoint p = new GeoPoint((int) (((double) lat / 1E5) * 1E6),
+	             (int) (((double) lng / 1E5) * 1E6));
+	        poly.add(p);
+	    }
+
+	    return poly;
 	}
 }

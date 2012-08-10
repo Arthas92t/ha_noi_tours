@@ -1,18 +1,18 @@
 package com.example.hanoitours;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.location.Geocoder;
-import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -33,6 +33,7 @@ public class MainActivity extends MapActivity {
 	private MyLocationOverlay location;
 	private PlaceList itemizedoverlay;
 	private GetPlaceListTask getPlaceListTask;
+	private GetDirectionsTask getDirectionsTask;
 
 	private class TrackLocation implements Runnable{
 		public TrackLocation() {
@@ -79,47 +80,49 @@ public class MainActivity extends MapActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
         map = (MapView) findViewById(R.id.mapview);
         map.setBuiltInZoomControls(true);
         configMap(map);
             
         mapOverlays = map.getOverlays();
-
         Drawable drawable = this.getResources().getDrawable(R.drawable.androidmarker);
         itemizedoverlay = new PlaceList(drawable, this);
         mapOverlays.add(itemizedoverlay);
 
-        GeoPoint point = new GeoPoint(21631899,105297546);
-        
         location = new MyLocationOverlay(this, map);
         mapOverlays.add(location);
-        
-        map.getController().setCenter(point);
-        map.getController().setZoom(10);
+                
         getPlaceListTask = new GetPlaceListTask(itemizedoverlay);
         getPlaceListTask.execute(URl_LIST_PLACE);
 
         Button SearchButton = (Button) findViewById(R.id.button1);
+
         SearchButton.setOnClickListener(new View.OnClickListener() {
 			
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
 				EditText textSearch = (EditText) findViewById(R.id.editText1);
 				String area = textSearch.getText().toString();
 				MainActivity.this.changeMap(area);
 			}
 		});
-        
-        Button M =(Button) findViewById(R.id.button2);
-        M.setOnClickListener(new OnClickListener() {
-			
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				startActivity(new Intent(getApplicationContext(),SettingActivity.class));
-			}
-		});
+                
+        ArrayList<GeoPoint> listGeo = new ArrayList<GeoPoint>();
+        GeoPoint point1= new GeoPoint(21035641,105781145);
+        GeoPoint point2 = new GeoPoint(21027395,105835143);
+        listGeo.add(point1);
+        listGeo.add(point2);
+        map.getController().animateTo(point1);
+        map.getController().setZoom(13);
+        getDirectionsTask = new GetDirectionsTask(this);
+        getDirectionsTask.execute(listGeo);
 	}
     
+    public void draw(ArrayList<GeoPoint> listGeo){
+    	MapOverlay mapOverlay = new MapOverlay(listGeo);
+        map.getOverlays().add(mapOverlay);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_main, menu);
