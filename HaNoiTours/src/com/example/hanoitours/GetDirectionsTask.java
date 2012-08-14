@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 
@@ -88,6 +89,9 @@ public class GetDirectionsTask extends AsyncTask <ArrayList<GeoPoint>, Integer, 
 	}
 	
 	private JSONObject requestDirections(String url){
+		if(url == null){
+			return null;
+		}
 		HttpClient client = new DefaultHttpClient();
 		HttpGet httpget = new HttpGet(url);
 		HttpResponse response;
@@ -121,6 +125,9 @@ public class GetDirectionsTask extends AsyncTask <ArrayList<GeoPoint>, Integer, 
 
 	private ArrayList<GeoPoint> decodePoly(String encoded) {
 
+		if(encoded == null){
+			return null;
+		}
 	    ArrayList<GeoPoint> poly = new ArrayList<GeoPoint>();
 	    int index = 0, len = encoded.length();
 	    int lat = 0, lng = 0;

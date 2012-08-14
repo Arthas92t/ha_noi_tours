@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.CheckBox;
 
 public class PlaceDetail extends Activity {
 	
@@ -16,16 +17,24 @@ public class PlaceDetail extends Activity {
 	private TextView text;
 	private GetPlaceInfoTask getInfoTask;
 	private GetImageTask getImageTask;
+	private Place place;
+	private PlaceList placeList;
+	
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place_detail);
-        
-        String url = URL + getIntent().getStringExtra("TEST") + ".json";
+        placeList = MainActivity.placeList;
+        place = placeList.getPlaceList().get(getIntent().getIntExtra("TEST", 0));
+        String url = URL + place.id + ".json";
         text = (TextView) findViewById(R.id.place_name);
         getInfoTask = new GetPlaceInfoTask(this);
         getInfoTask.execute(url);
+        if(MainActivity.listGeo.contains(place.point)){
+            CheckBox checkBox = (CheckBox) findViewById(R.id.mark_place);
+            checkBox.setChecked(true);
+        }
     }
 
     @Override
@@ -45,12 +54,18 @@ public class PlaceDetail extends Activity {
         getImageTask.execute(placeInfo.image);
     }
 
-    public void updateImage(Drawable image){
+    @SuppressWarnings("deprecation")
+	public void updateImage(Drawable image){
     	ImageView imageView = (ImageView) findViewById(R.id.place_image);
     	imageView.setBackgroundDrawable(image);
     }
     
     public void mark(View view){
-        
+        CheckBox checkBox = (CheckBox) findViewById(R.id.mark_place);
+        if(!checkBox.isChecked()){
+        	MainActivity.listGeo.remove(place.point);
+        	return;
+        }
+        MainActivity.listGeo.add(place.point);
     }
 }

@@ -2,14 +2,17 @@
 
     <string name="app_name">HaNoiTours</string>
     <string name="hello_world">Hello world!</string>
-    <string name="menu_settings">Setting</string>
+    <string name="place_name">place_name</string>
+    
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_setting">SettingActivity</string>
-    <string name="Satelline">Satelline</string>
-    <string name="Traffic">Traffic</string>
     <string name="title_activity_place_detail">PlaceDetail</string>
+    
+    <string name="settings">Setting</string>
+    <string name="direction">Direction</string>
+    <string name="satelline">Satelline</string>
+    <string name="traffic">Traffic</string>
     <string name="location">0</string>
-    <string name="place_name">place_name</string>
     <string name="search">Search</string>
     <string name ="welcome">Welcome</string>
     

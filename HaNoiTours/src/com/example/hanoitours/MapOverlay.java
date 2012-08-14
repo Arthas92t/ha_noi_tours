@@ -18,7 +18,6 @@ public class MapOverlay extends com.google.android.maps.Overlay{
 
 	public MapOverlay(ArrayList<GeoPoint> listGeoPoints){
 		myGeoPoint = listGeoPoints;
-		Log.e("debug", listGeoPoints.toString());
 	}
 		
 	public boolean draw(Canvas canvas, MapView mapView,boolean shadow,long when){

@@ -26,15 +26,17 @@ import com.google.android.maps.Overlay;
 
 public class MainActivity extends MapActivity {
 	
-	private final String URl_LIST_PLACE = "http://hanoitour.herokuapp.com/places.json";
+	private final static String URl_LIST_PLACE = "http://hanoitour.herokuapp.com/places.json";
 	
-	private List<Overlay> mapOverlays;
-	private MapView map;
-	private MyLocationOverlay location;
-	private PlaceList itemizedoverlay;
-	private GetPlaceListTask getPlaceListTask;
-	private GetDirectionsTask getDirectionsTask;
+	static ArrayList<GeoPoint> listGeo;
+	static PlaceList placeList;
 
+	private MapView map;
+
+	private MyLocationOverlay location;
+	private MapOverlay mapDirection;
+
+	
 	private class TrackLocation implements Runnable{
 		public TrackLocation() {
 		}
@@ -85,18 +87,17 @@ public class MainActivity extends MapActivity {
         map.setBuiltInZoomControls(true);
         configMap(map);
             
-        mapOverlays = map.getOverlays();
         Drawable drawable = this.getResources().getDrawable(R.drawable.androidmarker);
-        itemizedoverlay = new PlaceList(drawable, this);
-        mapOverlays.add(itemizedoverlay);
+        placeList = new PlaceList(drawable, this);
+        map.getOverlays().add(placeList);
 
         location = new MyLocationOverlay(this, map);
-        mapOverlays.add(location);
+        map.getOverlays().add(location);
                 
-        getPlaceListTask = new GetPlaceListTask(itemizedoverlay);
+        GetPlaceListTask getPlaceListTask = new GetPlaceListTask(placeList);
         getPlaceListTask.execute(URl_LIST_PLACE);
 
-        Button SearchButton = (Button) findViewById(R.id.button1);
+        Button SearchButton = (Button) findViewById(R.id.search_button);
 
         SearchButton.setOnClickListener(new View.OnClickListener() {
 			
@@ -107,20 +108,16 @@ public class MainActivity extends MapActivity {
 			}
 		});
                 
-        ArrayList<GeoPoint> listGeo = new ArrayList<GeoPoint>();
+        listGeo = new ArrayList<GeoPoint>();
         GeoPoint point1= new GeoPoint(21035641,105781145);
         GeoPoint point2 = new GeoPoint(21027395,105835143);
-        listGeo.add(point1);
-        listGeo.add(point2);
         map.getController().animateTo(point1);
         map.getController().setZoom(13);
-        getDirectionsTask = new GetDirectionsTask(this);
-        getDirectionsTask.execute(listGeo);
 	}
     
     public void draw(ArrayList<GeoPoint> listGeo){
-    	MapOverlay mapOverlay = new MapOverlay(listGeo);
-        map.getOverlays().add(mapOverlay);
+    	mapDirection = new MapOverlay(listGeo);
+        map.getOverlays().add(mapDirection);
     }
 
     @Override
@@ -135,6 +132,9 @@ public class MainActivity extends MapActivity {
         case R.id.menu_settings:
         	Intent intent = new Intent(this, SettingActivity.class);
         	startActivity(intent);
+            return true;
+        case R.id.menu_direction:
+        	suggestDirection();
             return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -162,6 +162,11 @@ public class MainActivity extends MapActivity {
     	location.disableMyLocation();
     }
     
+    private void suggestDirection(){
+    	map.getOverlays().remove(mapDirection);
+        (new GetDirectionsTask(this)).execute(listGeo);
+    	
+    }
     private void configMap(MapView map) {
 		map.setSatellite(Setting.satelline);
 		map.setTraffic(Setting.traffic);		

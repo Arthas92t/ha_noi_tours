@@ -33,7 +33,7 @@ public class PlaceList extends ItemizedOverlay<OverlayItem> {
 	protected boolean onTap(int index) {
 		Place item = mOverlays.get(index);
     	Intent intent = new Intent(mContext, PlaceDetail.class);
-    	intent.putExtra("TEST", item.id);
+    	intent.putExtra("TEST", index);
     	mContext.startActivity(intent);
 		return true;
 	}
@@ -41,5 +41,9 @@ public class PlaceList extends ItemizedOverlay<OverlayItem> {
 	public void addOverlay(Place overlay) {
 		mOverlays.add(overlay);
 		populate();
+	}
+	
+	public ArrayList<Place> getPlaceList(){
+		return mOverlays;
 	}
 }
