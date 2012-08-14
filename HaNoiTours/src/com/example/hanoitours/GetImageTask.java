@@ -35,6 +35,9 @@ public class GetImageTask extends AsyncTask <String, Integer, Drawable>{
 	}
 	
 	private Drawable download(String url){
+		if(url == null){
+			return null;
+		}
 		HttpClient client = new DefaultHttpClient();
 		HttpGet httpget = new HttpGet(url);
 		HttpResponse response;

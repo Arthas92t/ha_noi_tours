@@ -16,13 +16,12 @@ import org.json.JSONObject;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 
 public class GetDirectionsTask extends AsyncTask <ArrayList<GeoPoint>, Integer, ArrayList<GeoPoint>>{
 
-	private String TAG ="GetPlaceInfoTask";
+	private String TAG ="GetDirectionsTask";
 	
 	private String URL = "http://maps.googleapis.com/maps/api/directions/json?origin=";
 	private String ROUTES = "routes";
@@ -83,7 +82,7 @@ public class GetDirectionsTask extends AsyncTask <ArrayList<GeoPoint>, Integer, 
 				+ "&destination=" + pointToString(arg0.get(1))
 				+ "&waypoints=optimize:true";
 		for(int i = 2; i < arg0.size(); i++)
-			url = url + "|" + pointToString(arg0.get(i));
+			url = url + "%7C" + pointToString(arg0.get(i));
 		url = url + "&sensor=false&mode=driving";
 		return url;
 	}
@@ -94,19 +93,24 @@ public class GetDirectionsTask extends AsyncTask <ArrayList<GeoPoint>, Integer, 
 		}
 		HttpClient client = new DefaultHttpClient();
 		HttpGet httpget = new HttpGet(url);
+		try{
+			url = new String(url.getBytes(),"UTF-8");
+			Log.e(TAG, url);
+			httpget = new HttpGet(url);
+		}catch(Exception e){
+			
+		}
 		HttpResponse response;
 		try{
 			response = client.execute(httpget);
 			HttpEntity entity = response.getEntity();
-			
-			//need to be edited
 			JSONObject directions = new JSONObject(
 					this.streamToString(entity.getContent()));
 			return directions;
 		}catch(JSONException e){
-			Log.e(TAG, "JSONException " + e);
+			Log.e(TAG, "JSONException at requestDirections" + e);
 		}catch(IOException e){
-			Log.e(TAG, "IOException " + e);			
+			Log.e(TAG, "IOException at requestDirections" + e);			
 		}
 		return null;
 	}

@@ -130,11 +130,15 @@ public class MainActivity extends MapActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
         case R.id.menu_settings:
-        	Intent intent = new Intent(this, SettingActivity.class);
-        	startActivity(intent);
+        	Intent intent1 = new Intent(this, SettingActivity.class);
+        	startActivity(intent1);
             return true;
         case R.id.menu_direction:
         	suggestDirection();
+            return true;
+        case R.id.menu_account:
+        	Intent intent2 = new Intent(this, OauthActivity.class);
+        	startActivity(intent2);
             return true;
         default:
             return super.onOptionsItemSelected(item);
