@@ -52,8 +52,8 @@ public class PlaceDetail extends Activity {
     
     public void updateUI(PlaceInfo placeInfo){
     	text.setText(Html.fromHtml(placeInfo.info));
-    	getImageTask = new GetImageTask(this);
-    	getImageTask.execute(placeInfo.image);
+//    	getImageTask = new GetImageTask(this);
+//    	getImageTask.execute(placeInfo.image);
     }
 
     @SuppressWarnings("deprecation")
