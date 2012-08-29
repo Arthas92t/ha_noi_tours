@@ -3,11 +3,13 @@ package com.example.hanoitours;
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.Menu;
 import android.view.View;
+import android.webkit.WebView;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.CheckBox;
 
 public class PlaceDetail extends Activity {
 	
@@ -49,9 +51,9 @@ public class PlaceDetail extends Activity {
     }
     
     public void updateUI(PlaceInfo placeInfo){
-        text.setText(placeInfo.name+"\n"+placeInfo.address+"\n"+placeInfo.info);
-        getImageTask = new GetImageTask(this);
-        getImageTask.execute(placeInfo.image);
+    	text.setText(Html.fromHtml(placeInfo.info));
+    	getImageTask = new GetImageTask(this);
+    	getImageTask.execute(placeInfo.image);
     }
 
     @SuppressWarnings("deprecation")

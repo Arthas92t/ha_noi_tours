@@ -20,7 +20,6 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:singleLine="true"
         android:padding="@dimen/padding_medium"
         android:text="@string/hello_world"
         tools:context=".PlaceDetail"

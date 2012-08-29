@@ -10,6 +10,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,6 +20,7 @@ import android.util.Log;
 public class GetPlaceInfoTask extends AsyncTask <String, Integer, PlaceInfo>{
 
 	private String TAG ="GetPlaceInfoTask";
+	private String INFO_OBJ = "place_info";	
 	private String NAME = "name";
 	private String ADDRESS = "address";
 	private String IMAGE = "image";
@@ -71,8 +73,8 @@ public class GetPlaceInfoTask extends AsyncTask <String, Integer, PlaceInfo>{
 			HttpEntity entity = response.getEntity();
 			
 			//need to be edited
-			JSONObject place = new JSONObject(
-					this.streamToString(entity.getContent()));
+			JSONObject place =(new JSONObject(
+					streamToString(entity.getContent()))).getJSONObject(INFO_OBJ);
 			return new PlaceInfo(
 					place.getString(NAME), place.getString(ADDRESS),
 					place.getString(IMAGE), place.getString(INFO));
