@@ -1,14 +1,14 @@
 package com.example.hanoitours;
 
 import android.app.Activity;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.CheckBox;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 public class PlaceDetail extends Activity {
@@ -16,11 +16,10 @@ public class PlaceDetail extends Activity {
 	private final String TAG= "PlaceDetail";
 	private final String URL = "http://hanoitour.herokuapp.com/places/";
 	
-	private TextView text;
 	private GetPlaceInfoTask getInfoTask;
-	private GetImageTask getImageTask;
 	private Place place;
 	private PlaceList placeList;
+	private PlaceInfo placeInfo;
 	
 	
     @Override
@@ -30,8 +29,8 @@ public class PlaceDetail extends Activity {
         placeList = MainActivity.placeList;
         place = placeList.getPlaceList().get(getIntent().getIntExtra("TEST", 0));
         String url = URL + place.id + ".json";
-        text = (TextView) findViewById(R.id.place_name);
         getInfoTask = new GetPlaceInfoTask(this);
+        placeInfo = null;
         getInfoTask.execute(url);
         if(MainActivity.listGeo.contains(place.point)){
             CheckBox checkBox = (CheckBox) findViewById(R.id.mark_place);
@@ -41,7 +40,8 @@ public class PlaceDetail extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        return false;
+        getMenuInflater().inflate(R.menu.activity_place_detail, menu);
+        return true;
     }
     
     @Override
@@ -51,15 +51,14 @@ public class PlaceDetail extends Activity {
     }
     
     public void updateUI(PlaceInfo placeInfo){
-    	text.setText(Html.fromHtml(placeInfo.info));
-//    	getImageTask = new GetImageTask(this);
-//    	getImageTask.execute(placeInfo.image);
-    }
-
-    @SuppressWarnings("deprecation")
-	public void updateImage(Drawable image){
-    	ImageView imageView = (ImageView) findViewById(R.id.place_image);
-    	imageView.setBackgroundDrawable(image);
+    	this.placeInfo = placeInfo;
+    	String source = "<b>" + placeInfo.name + "</b><br>";
+    	source = source + "<b>" + placeInfo.address + "</b><br>";
+    	WebView webview = (WebView) findViewById(R.id.place_detail);
+    	webview.loadData(
+    			Html.toHtml(Html.fromHtml(source + placeInfo.info)),
+    			"text/html; charset=utf-8",
+    			null);
     }
     
     public void mark(View view){
@@ -69,5 +68,41 @@ public class PlaceDetail extends Activity {
         	return;
         }
         MainActivity.listGeo.add(place.point);
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	switch (item.getItemId()) {
+        case R.id.menu_view_comment:
+        	showComment();
+        	return true;
+        case R.id.menu_post_comment:
+        	setContentView(R.layout.post_comment);
+        	return true;
+        default:
+            return super.onOptionsItemSelected(item);
+    	}    
+    }
+    
+    private void showComment(){
+    	if(placeInfo == null)
+    		return;
+    	setContentView(R.layout.view_comment);
+    	TextView comment = (TextView) findViewById(R.id.comment);
+    	String allComment = 
+    			placeInfo.comment.length() + 
+    			" comments\n" + 
+    			"Rating: " + placeInfo.rate +"\n\n";
+    	for(int i = 0; i < placeInfo.comment.length(); i++){
+    		try{
+	    		allComment = allComment + placeInfo.comment.
+	    				getJSONObject(i).
+	    				getString("user_id");
+	    		allComment = allComment + ": " + placeInfo.comment.
+	    				getJSONObject(i).
+	    				getString("content") + "\n";
+    		}catch (Exception e) {
+			}
+    	}
+    	comment.setText(allComment);
     }
 }

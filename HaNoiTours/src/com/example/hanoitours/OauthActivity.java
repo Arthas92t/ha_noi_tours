@@ -44,7 +44,7 @@ public class OauthActivity extends Activity {
         
     	accountManager.invalidateAuthToken(
     			"com.google", "ya29.AHES6ZSIDlQv1WSmo8OtubVpStLeBMQmiiqyrDWFnn60hcw");
-    	requestToken(listAccount[1]);
+    	requestToken(listAccount[0]);
     }
 
     @Override

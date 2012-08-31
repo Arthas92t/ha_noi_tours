@@ -18,6 +18,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
+import com.google.android.maps.MapView;
 
 public class GetPlaceListTask extends AsyncTask <String, Place, Integer>{
 	
@@ -25,12 +26,13 @@ public class GetPlaceListTask extends AsyncTask <String, Place, Integer>{
 	private final int BASE = 1000000;
 	private final String ID = "id";
 	private final String NAME = "name";
+	private MapView map;
+	private PlaceList itemizedoverlay;
 	
-	PlaceList itemizedoverlay;
-	
-	public GetPlaceListTask(PlaceList itemizedoverlay) {
+	public GetPlaceListTask(PlaceList itemizedoverlay, MapView map) {
 		super();
 		this.itemizedoverlay = itemizedoverlay;
+		this.map = map;
 	}
 
 	@Override
@@ -88,7 +90,7 @@ public class GetPlaceListTask extends AsyncTask <String, Place, Integer>{
 				int x = (int)( xFloat * BASE);
 				int y = (int)( yFloat * BASE);
 				GeoPoint point = new GeoPoint(x, y); 
-				itemizedoverlay.addOverlay(new Place(
+				publishProgress(new Place(
 						place.getString(ID), place.getString(NAME), point));
 			}
 		}catch(JSONException e){
@@ -97,4 +99,11 @@ public class GetPlaceListTask extends AsyncTask <String, Place, Integer>{
 			Log.e(TAG, "IOException " + e);			
 		}
 	}
+
+    protected void onProgressUpdate(Place... place) {
+    	for(int i = 0; i < place.length; i++){
+    		itemizedoverlay.addOverlay(place[i]);
+    		map.invalidate();
+    	}
+    }
 }

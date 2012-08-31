@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_settings"
+        android:title="@string/settings"
+        android:orderInCategory="100"/>
+    <item android:id="@+id/menu_view_comment"
+        android:title="@string/view_comment"
+        ></item>
+    <item android:id="@+id/menu_post_comment"
+        android:title="@string/post_comment"
+        ></item>
+</menu>

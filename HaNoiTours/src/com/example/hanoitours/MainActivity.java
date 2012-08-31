@@ -68,6 +68,7 @@ public class MainActivity extends MapActivity {
 		}
 		catch(IOException io){
 			Toast.makeText(MainActivity.this, "Connection Error", Toast.LENGTH_SHORT).show();
+			return;
 		}
 		myLocation = new GeoPoint(
 				(int) (lat * 1E6),
@@ -94,7 +95,7 @@ public class MainActivity extends MapActivity {
         location = new MyLocationOverlay(this, map);
         map.getOverlays().add(location);
                 
-        GetPlaceListTask getPlaceListTask = new GetPlaceListTask(placeList);
+        GetPlaceListTask getPlaceListTask = new GetPlaceListTask(placeList, map);
         getPlaceListTask.execute(URl_LIST_PLACE);
 
         Button SearchButton = (Button) findViewById(R.id.search_button);
@@ -112,7 +113,6 @@ public class MainActivity extends MapActivity {
         GeoPoint point1= new GeoPoint(21035641,105781145);
         GeoPoint point2 = new GeoPoint(21027395,105835143);
         map.getController().animateTo(point1);
-        map.getController().setZoom(13);
 	}
     
     public void draw(ArrayList<GeoPoint> listGeo){
@@ -179,4 +179,5 @@ public class MainActivity extends MapActivity {
     public void getLocation(View view){
         location.runOnFirstFix(new TrackLocation());
     }
+    
 }

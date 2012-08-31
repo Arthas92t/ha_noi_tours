@@ -70,13 +70,15 @@ public class GetPlaceInfoTask extends AsyncTask <String, Integer, PlaceInfo>{
 		try{
 			response = client.execute(httpget);
 			HttpEntity entity = response.getEntity();
-			
+			String source = streamToString(entity.getContent());
 			//need to be edited
 			JSONObject place =(new JSONObject(
-					streamToString(entity.getContent()))).getJSONObject(INFO_OBJ);
+					source)).getJSONObject(INFO_OBJ);
 			return new PlaceInfo(
 					place.getString(NAME), place.getString(ADDRESS),
-					place.getString(IMAGE), place.getString(INFO));
+					place.getString(IMAGE), place.getString(INFO),
+					(new JSONObject(source)).getJSONArray("comments"),
+					(new JSONObject(source)).getDouble("rating"));
 		}catch(JSONException e){
 			Log.e(TAG, "JSONException " + e);
 		}catch(IOException e){

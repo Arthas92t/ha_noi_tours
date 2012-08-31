@@ -22,7 +22,7 @@ import android.util.Log;
 
 public class PostCommentTask extends AsyncTask <ArrayList<String>, Place, String>{
 	private static String TAG = "PostCommentTask"; 	
-	private static String URL = "http://hanoitour.herokuapp.com/places/500cc02bee38070200000002/rate_and_comment"; 	
+	private static String URL = "http://hanoitour.herokuapp.com/places/503de332bfd48c0200000006/rate_and_comment"; 	
 	private static String URL2 = "http://hanoitour.herokuapp.com/places";
 	public PostCommentTask() {
 		super();

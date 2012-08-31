@@ -16,5 +16,7 @@
     <string name="welcome">Welcome</string>
     <string name="menu_settings">Settings</string>
     <string name="account_settings">Account settings</string>
-    
+    <string name="view_comment">View Comment</string>
+    <string name="post_comment">Post Comment</string>
+
 </resources>
