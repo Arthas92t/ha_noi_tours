@@ -28,7 +28,7 @@ public class MainActivity extends MapActivity {
 	
 	private final static String URl_LIST_PLACE = "http://hanoitour.herokuapp.com/places.json";
 	
-	static ArrayList<GeoPoint> listGeo;
+	static ArrayList<GeoPoint> listGeo = new ArrayList<GeoPoint>();
 	static PlaceList placeList;
 
 	private MapView map;
@@ -88,7 +88,7 @@ public class MainActivity extends MapActivity {
         map.setBuiltInZoomControls(true);
         configMap(map);
             
-        Drawable drawable = this.getResources().getDrawable(R.drawable.androidmarker);
+        Drawable drawable = this.getResources().getDrawable(R.drawable.mapflag);
         placeList = new PlaceList(drawable, this);
         map.getOverlays().add(placeList);
 
@@ -109,10 +109,8 @@ public class MainActivity extends MapActivity {
 			}
 		});
                 
-        listGeo = new ArrayList<GeoPoint>();
-        GeoPoint point1= new GeoPoint(21035641,105781145);
         GeoPoint point2 = new GeoPoint(21027395,105835143);
-        map.getController().animateTo(point1);
+        map.getController().animateTo(point2);
 	}
     
     public void draw(ArrayList<GeoPoint> listGeo){
@@ -163,7 +161,11 @@ public class MainActivity extends MapActivity {
     }
     
     private void suggestDirection(){
-    	map.getOverlays().remove(mapDirection);
+    	 if(listGeo.size()<=1){
+    		    Toast.makeText(MainActivity.this, "You need chose at least 2 place !!!!", Toast.LENGTH_SHORT).show();
+    		    return;
+    	 }
+    	 map.getOverlays().remove(mapDirection);
         (new GetDirectionsTask(this)).execute(listGeo);
     	
     }

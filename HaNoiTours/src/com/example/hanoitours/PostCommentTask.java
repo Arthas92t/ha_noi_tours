@@ -22,9 +22,11 @@ import android.util.Log;
 
 public class PostCommentTask extends AsyncTask <ArrayList<String>, Place, String>{
 	private static String TAG = "PostCommentTask"; 	
-	private String url = "http://hanoitour.herokuapp.com/places/"; 	
-	public PostCommentTask() {
+	private String url = "http://hanoitour.herokuapp.com/places/";
+	PlaceDetail activity;
+	public PostCommentTask(PlaceDetail activity) {
 		super();
+		this.activity = activity;
 	}
 
 	@Override
@@ -63,7 +65,9 @@ public class PostCommentTask extends AsyncTask <ArrayList<String>, Place, String
 			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 			Log.e(TAG, data.get(0));
 			nameValuePairs.add(new BasicNameValuePair("place[access_token]", data.get(1)));
-			nameValuePairs.add(new BasicNameValuePair("place[comment_content]", data.get(2)));
+			if(data.get(2) !="")
+				nameValuePairs.add(new BasicNameValuePair("place[comment_content]", data.get(2)));
+			if(data.get(3) !="")
 			nameValuePairs.add(new BasicNameValuePair("place[user_rate_value]", data.get(3)));
 			httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 			// Execute HTTP Post Request
@@ -84,5 +88,11 @@ public class PostCommentTask extends AsyncTask <ArrayList<String>, Place, String
 		}catch(IOException e){
 			
 		}
+	}
+	
+	@Override
+	protected void onPostExecute(String result) {
+		activity.endPost();
+//		(new LoadImageTask(currentActivity)).execute(result.image);
 	}
 }

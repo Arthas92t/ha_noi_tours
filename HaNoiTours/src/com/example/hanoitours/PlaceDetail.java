@@ -1,22 +1,39 @@
 package com.example.hanoitours;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class PlaceDetail extends Activity {
 	
@@ -26,11 +43,12 @@ public class PlaceDetail extends Activity {
 	private GetPlaceInfoTask getInfoTask;
 	private Place place;
 	private PlaceList placeList;
-	private PlaceInfo placeInfo;
 	private AccountManager accountManager;
-	private Account account;
+	PlaceInfo placeInfo;
+	Account account;
 	Bundle options = new Bundle();
-	
+    ProgressDialog progDialog;
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +63,7 @@ public class PlaceDetail extends Activity {
             CheckBox checkBox = (CheckBox) findViewById(R.id.mark_place);
             checkBox.setChecked(true);
         }
+        showDialog(0);
     }
 
     @Override
@@ -60,6 +79,7 @@ public class PlaceDetail extends Activity {
     }
     
     public void updateUI(PlaceInfo placeInfo){
+    	dismissDialog(0);
     	this.placeInfo = placeInfo;
     	String source = "<b>" + placeInfo.name + "</b><br>";
     	source = source + "<b>" + placeInfo.address + "</b><br>";
@@ -77,6 +97,7 @@ public class PlaceDetail extends Activity {
         	return;
         }
         MainActivity.listGeo.add(place.point);
+        finish();
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -85,11 +106,21 @@ public class PlaceDetail extends Activity {
         	showComment();
         	return true;
         case R.id.menu_post_comment:
+        	accountManager = AccountManager.get(this);
+        	Account[] listAccount = accountManager.getAccountsByType("com.google");
+
+        	if (listAccount.length ==0){
+        		Toast.makeText(PlaceDetail.this, "You must have a google account", Toast.LENGTH_SHORT).show();
+        		return true;
+        	}
+        	account = listAccount[0];
         	setContentView(R.layout.post_comment);
+        	showDialog(2);
+        	(new GetRateTask(this)).execute(place.id);
         	return true;
         default:
             return super.onOptionsItemSelected(item);
-    	}    
+    	}
     }
     
     private void showComment(){
@@ -117,15 +148,8 @@ public class PlaceDetail extends Activity {
     
     public void post(View view){
     	String comment  = ((EditText) findViewById(R.id.input_comment)).getText().toString();
-    	String rate = ((EditText) findViewById(R.id.input_rate)).getText().toString();
+    	String rate = "" + ((RatingBar) findViewById(R.id.input_rate)).getRating();
     	
-    	accountManager = AccountManager.get(this);
-    	Account[] listAccount = accountManager.getAccountsByType("com.google");
-
-    	if (listAccount.length ==0){
-    		return;
-    	}
-    	account = listAccount[0];
     	accountManager.getAuthToken(
     			account,
     			"oauth2:https://www.googleapis.com/auth/userinfo.email",
@@ -133,6 +157,7 @@ public class PlaceDetail extends Activity {
     			this,
     			new ResetTokenAndPost(this, comment, rate),
     			new Handler());
+    	showDialog(1);
     }
 
 	private class ResetTokenAndPost implements AccountManagerCallback<Bundle> {
@@ -193,7 +218,26 @@ public class PlaceDetail extends Activity {
 	    	data.add(token);
 	    	data.add(comment);
 	    	data.add(rate);    	
-	    	(new PostCommentTask()).execute(data);
+	    	(new PostCommentTask(PlaceDetail.this)).execute(data);
 	    }		
+	}
+	
+	@Override
+    protected Dialog onCreateDialog(int id) {
+		progDialog = new ProgressDialog(this);
+		progDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		progDialog.setMessage("Loading...");
+		return progDialog;
+	}
+	
+	public void endPost(){
+		dismissDialog(1);
+		finish();
+	}
+	
+	public void updateRate(double rate){
+    	float floatRate = (int)(rate* 10);
+    	((RatingBar) findViewById(R.id.input_rate)).setRating(floatRate/10);
+    	dismissDialog(2);		
 	}
 }

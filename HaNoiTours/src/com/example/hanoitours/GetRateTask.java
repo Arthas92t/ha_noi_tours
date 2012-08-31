@@ -10,38 +10,28 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class GetPlaceInfoTask extends AsyncTask <String, Integer, PlaceInfo>{
+public class GetRateTask extends AsyncTask <String, Integer, Double>{
 
-	private String TAG ="GetPlaceInfoTask";
-	private String INFO_OBJ = "place_info";	
-	private String NAME = "name";
-	private String ADDRESS = "address";
-	private String IMAGE = "image";
-	private String INFO = "info";
+	private String TAG ="GetRateTask";
 	
 	private PlaceDetail currentActivity;
-	private AlertDialog.Builder dialog;
-	public GetPlaceInfoTask(PlaceDetail activity) {
+	public GetRateTask(PlaceDetail activity) {
 		super();
 		this.currentActivity = activity;
 	}
 
 	@Override
-	protected PlaceInfo doInBackground(String... arg0) {
-		return download(arg0[0]);
+	protected Double doInBackground(String... arg0) {
+		return getRate(arg0[0]);
 	}
 	
 	@Override
-	protected void onPostExecute(PlaceInfo result) {
-		currentActivity.updateUI(result);
+	protected void onPostExecute(Double result) {
+		currentActivity.updateRate(result);
 //		(new LoadImageTask(currentActivity)).execute(result.image);
 	}
 	
@@ -65,28 +55,33 @@ public class GetPlaceInfoTask extends AsyncTask <String, Integer, PlaceInfo>{
         return content;
 	}
 	
-	private PlaceInfo download(String url){
+	private double getRate(String id){
 		HttpClient client = new DefaultHttpClient();
-		HttpGet httpget = new HttpGet(url);
+		id = "http://hanoitour.herokuapp.com/places/" +  id;
+		HttpGet httpget = new HttpGet(id);
 		HttpResponse response;
 		try{
 			response = client.execute(httpget);
 			HttpEntity entity = response.getEntity();
 			String source = streamToString(entity.getContent());
 			//need to be edited
-			JSONObject place =(new JSONObject(
-					source)).getJSONObject(INFO_OBJ);
-			return new PlaceInfo(
-					place.getString(NAME), place.getString(ADDRESS),
-					place.getString(IMAGE), place.getString(INFO),
-					(new JSONObject(source)).getJSONArray("comments"),
-					(new JSONObject(source)).getDouble("rating"));
-		}catch(JSONException e){
-			Log.e(TAG, "JSONException " + e);
-		}catch(IOException e){
-			Log.e(TAG, "IOException " + e);			
+			
+			int i = source.lastIndexOf("Rates:");
+			String flag_account = currentActivity.account.name;
+			
+			i = source.indexOf(flag_account, i);
+			Log.e(TAG, flag_account);
+			String rate = source.substring(
+					i + flag_account.length(),
+					source.indexOf("<",i + flag_account.length()));
+			
+			rate = rate.trim();
+			return (new Double(rate));
+		}catch(NumberFormatException e){
+			Log.e(TAG, ""+e);			
+		}catch(Exception e){
+			Log.e(TAG, ""+e);						
 		}
-		return null;
+		return currentActivity.placeInfo.rate;
 	}
-	
 }
