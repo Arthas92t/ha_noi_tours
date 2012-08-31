@@ -1,14 +1,21 @@
 package com.example.hanoitours;
 
+import java.util.ArrayList;
+
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Html;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class PlaceDetail extends Activity {
@@ -20,7 +27,9 @@ public class PlaceDetail extends Activity {
 	private Place place;
 	private PlaceList placeList;
 	private PlaceInfo placeInfo;
-	
+	private AccountManager accountManager;
+	private Account account;
+	Bundle options = new Bundle();
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -105,4 +114,86 @@ public class PlaceDetail extends Activity {
     	}
     	comment.setText(allComment);
     }
+    
+    public void post(View view){
+    	String comment  = ((EditText) findViewById(R.id.input_comment)).getText().toString();
+    	String rate = ((EditText) findViewById(R.id.input_rate)).getText().toString();
+    	
+    	accountManager = AccountManager.get(this);
+    	Account[] listAccount = accountManager.getAccountsByType("com.google");
+
+    	if (listAccount.length ==0){
+    		return;
+    	}
+    	account = listAccount[0];
+    	accountManager.getAuthToken(
+    			account,
+    			"oauth2:https://www.googleapis.com/auth/userinfo.email",
+    			options,
+    			this,
+    			new ResetTokenAndPost(this, comment, rate),
+    			new Handler());
+    }
+
+	private class ResetTokenAndPost implements AccountManagerCallback<Bundle> {
+		PlaceDetail activity;
+		String comment;
+		String rate;
+		public ResetTokenAndPost(PlaceDetail activity, String comment, String rate){
+			super();
+			this.activity = activity;
+			this.comment = comment;
+			this.rate = rate;
+		}
+		public void run(AccountManagerFuture<Bundle> result) {
+			Bundle bundle = null;
+			try{
+				bundle= result.getResult();
+			}catch(Exception e){
+				return;
+			}
+	        // The token is a named value in the bundle. The name of the value
+	        // is stored in the constant AccountManager.KEY_AUTHTOKEN.
+	        String token = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+	        PlaceDetail.this.accountManager.invalidateAuthToken(
+	    			"com.google", token);
+	    	accountManager.getAuthToken(
+	    			account,
+	    			"oauth2:https://www.googleapis.com/auth/userinfo.email",
+	    			options,
+	    			activity,
+	    			new GetTokenAndPost(activity, comment, rate),
+	    			new Handler());
+			
+	    }		
+	}
+
+	private class GetTokenAndPost implements AccountManagerCallback<Bundle> {
+		PlaceDetail activity;
+		String comment;
+		String rate;
+		public GetTokenAndPost(PlaceDetail activity, String comment, String rate){
+			super();
+			this.activity = activity;
+			this.comment = comment;
+			this.rate = rate;
+		}
+		public void run(AccountManagerFuture<Bundle> result) {
+			Bundle bundle = null;
+			try{
+				bundle= result.getResult();
+			}catch(Exception e){
+				return;
+			}
+	        // The token is a named value in the bundle. The name of the value
+	        // is stored in the constant AccountManager.KEY_AUTHTOKEN.
+	        String token = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+	    	ArrayList<String> data = new ArrayList<String>();
+	    	data.add(place.id);
+	    	data.add(token);
+	    	data.add(comment);
+	    	data.add(rate);    	
+	    	(new PostCommentTask()).execute(data);
+	    }		
+	}
 }

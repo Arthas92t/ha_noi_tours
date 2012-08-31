@@ -22,8 +22,7 @@ import android.util.Log;
 
 public class PostCommentTask extends AsyncTask <ArrayList<String>, Place, String>{
 	private static String TAG = "PostCommentTask"; 	
-	private static String URL = "http://hanoitour.herokuapp.com/places/503de332bfd48c0200000006/rate_and_comment"; 	
-	private static String URL2 = "http://hanoitour.herokuapp.com/places";
+	private String url = "http://hanoitour.herokuapp.com/places/"; 	
 	public PostCommentTask() {
 		super();
 	}
@@ -56,15 +55,16 @@ public class PostCommentTask extends AsyncTask <ArrayList<String>, Place, String
 
 	private void post(ArrayList<String> data){
 		HttpClient client = new DefaultHttpClient();
-		HttpPost httppost = new HttpPost(URL);
+		url = url + data.get(0) + "/rate_and_comment";
+		HttpPost httppost = new HttpPost(url);
 		HttpResponse response = null;
 		try {
 			// Add your data
 			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 			Log.e(TAG, data.get(0));
-			nameValuePairs.add(new BasicNameValuePair("place[access_token]", data.get(0)));
-			nameValuePairs.add(new BasicNameValuePair("place[comment_content]", data.get(1)));
-			nameValuePairs.add(new BasicNameValuePair("place[user_rate_value]", data.get(2)));
+			nameValuePairs.add(new BasicNameValuePair("place[access_token]", data.get(1)));
+			nameValuePairs.add(new BasicNameValuePair("place[comment_content]", data.get(2)));
+			nameValuePairs.add(new BasicNameValuePair("place[user_rate_value]", data.get(3)));
 			httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 			// Execute HTTP Post Request
 			response = client.execute(httppost);

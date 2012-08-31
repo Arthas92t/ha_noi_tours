@@ -38,15 +38,6 @@
             android:name=".PlaceDetail"
             android:label="@string/title_activity_place_detail" >
         </activity>
-        <activity
-            android:name=".OauthActivity"
-            android:label="@string/title_activity_oauth" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
     </application>
 
 </manifest>

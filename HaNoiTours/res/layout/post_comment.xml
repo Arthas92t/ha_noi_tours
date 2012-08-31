@@ -7,22 +7,21 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
         android:padding="@dimen/padding_medium"
-        android:text="your comment"
+        android:text=""
         android:id="@+id/input_comment"/>
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
+        android:layout_below="@id/input_comment"
         android:padding="@dimen/padding_medium"
-        android:text="rate"
+        android:text=""
         android:id="@+id/input_rate"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
+        android:layout_below="@id/input_rate"        
         android:onClick="post"/>
 </RelativeLayout>

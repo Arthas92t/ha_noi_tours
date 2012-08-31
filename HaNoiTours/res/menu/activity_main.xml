@@ -5,7 +5,4 @@
     <item android:id="@+id/menu_direction"
         android:title="@string/direction"
         ></item>
-    <item android:id="@+id/menu_account"
-        android:title="@string/account_settings"
-        ></item>
 </menu>

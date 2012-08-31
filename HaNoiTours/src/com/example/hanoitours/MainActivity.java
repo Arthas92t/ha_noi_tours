@@ -136,10 +136,6 @@ public class MainActivity extends MapActivity {
         case R.id.menu_direction:
         	suggestDirection();
             return true;
-        case R.id.menu_account:
-        	Intent intent2 = new Intent(this, OauthActivity.class);
-        	startActivity(intent2);
-            return true;
         default:
             return super.onOptionsItemSelected(item);
     	}    

@@ -13,6 +13,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -26,7 +28,7 @@ public class GetPlaceInfoTask extends AsyncTask <String, Integer, PlaceInfo>{
 	private String INFO = "info";
 	
 	private PlaceDetail currentActivity;
-	
+	private AlertDialog.Builder dialog;
 	public GetPlaceInfoTask(PlaceDetail activity) {
 		super();
 		this.currentActivity = activity;
@@ -85,5 +87,13 @@ public class GetPlaceInfoTask extends AsyncTask <String, Integer, PlaceInfo>{
 			Log.e(TAG, "IOException " + e);			
 		}
 		return null;
+	}
+	
+	@Override
+	protected void onPreExecute(){
+		dialog = new AlertDialog.Builder(currentActivity);
+		dialog.setTitle("Loading...");
+		dialog.setMessage("Loading...");
+		dialog.show();
 	}
 }
