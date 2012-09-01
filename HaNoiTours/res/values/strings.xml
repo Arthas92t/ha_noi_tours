@@ -3,7 +3,7 @@
     <string name="app_name">HaNoiTours</string>
     <string name="hello_world">Hello world!</string>
     <string name="place_name">place_name</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main">Ha Noi Tours</string>
     <string name="title_activity_setting">SettingActivity</string>
     <string name="title_activity_place_detail">PlaceDetail</string>
     <string name="title_activity_oauth">OauthActivity</string>
@@ -11,7 +11,7 @@
     <string name="direction">Direction</string>
     <string name="satelline">Satelline</string>
     <string name="traffic">Traffic</string>
-    <string name="location">0</string>
+    <string name="location">*</string>
     <string name="search">Search</string>
     <string name="welcome">Welcome</string>
     <string name="menu_settings">Settings</string>

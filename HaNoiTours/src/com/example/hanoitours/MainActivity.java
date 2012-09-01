@@ -2,13 +2,13 @@ package com.example.hanoitours;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.location.Geocoder;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,19 +22,19 @@ import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
-import com.google.android.maps.Overlay;
 
 public class MainActivity extends MapActivity {
 	
 	private final static String URl_LIST_PLACE = "http://hanoitour.herokuapp.com/places.json";
 	
-	static ArrayList<GeoPoint> listGeo = new ArrayList<GeoPoint>();
+	static MarkedList listGeo;
 	static PlaceList placeList;
 
-	private MapView map;
+	static MapView map;
 
 	private MyLocationOverlay location;
 	private MapOverlay mapDirection;
+	private ProgressDialog progDialog;
 
 	
 	private class TrackLocation implements Runnable{
@@ -51,8 +51,8 @@ public class MainActivity extends MapActivity {
 		MapController mc = mapView.getController();
 		
 		GeoPoint myLocation = null;
-		double lat = 0;
-		double lng = 0;
+		double lat = 21027395;
+		double lng = 105835143;
 		try{
 			Geocoder g = new Geocoder(this, Locale.getDefault());
 			java.util.List<android.location.Address> result=g.getFromLocationName(area , 1);
@@ -68,7 +68,6 @@ public class MainActivity extends MapActivity {
 		}
 		catch(IOException io){
 			Toast.makeText(MainActivity.this, "Connection Error", Toast.LENGTH_SHORT).show();
-			return;
 		}
 		myLocation = new GeoPoint(
 				(int) (lat * 1E6),
@@ -92,6 +91,10 @@ public class MainActivity extends MapActivity {
         placeList = new PlaceList(drawable, this);
         map.getOverlays().add(placeList);
 
+        Drawable drawable1 = this.getResources().getDrawable(R.drawable.marker);
+        listGeo = new MarkedList(drawable1, this);
+        map.getOverlays().add(listGeo);
+
         location = new MyLocationOverlay(this, map);
         map.getOverlays().add(location);
                 
@@ -108,12 +111,12 @@ public class MainActivity extends MapActivity {
 				MainActivity.this.changeMap(area);
 			}
 		});
-                
         GeoPoint point2 = new GeoPoint(21027395,105835143);
         map.getController().animateTo(point2);
 	}
     
     public void draw(ArrayList<GeoPoint> listGeo){
+    	dismissDialog(1);
     	mapDirection = new MapOverlay(listGeo);
         map.getOverlays().add(mapDirection);
     }
@@ -127,12 +130,12 @@ public class MainActivity extends MapActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
-        case R.id.menu_settings:
-        	Intent intent1 = new Intent(this, SettingActivity.class);
-        	startActivity(intent1);
+        case R.id.menu_switch_view_mode:
+        	map.setSatellite(!map.isSatellite());
             return true;
         case R.id.menu_direction:
         	suggestDirection();
+        	showDialog(1);
             return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -166,7 +169,7 @@ public class MainActivity extends MapActivity {
     		    return;
     	 }
     	 map.getOverlays().remove(mapDirection);
-        (new GetDirectionsTask(this)).execute(listGeo);
+        (new GetDirectionsTask(this)).execute(listGeo.getListGeoPoint());
     	
     }
     private void configMap(MapView map) {
@@ -178,4 +181,12 @@ public class MainActivity extends MapActivity {
         location.runOnFirstFix(new TrackLocation());
     }
     
+	@Override
+    protected Dialog onCreateDialog(int id) {
+		progDialog = new ProgressDialog(this);
+		progDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		progDialog.setMessage("Loading...");
+		return progDialog;
+	}
+	
 }

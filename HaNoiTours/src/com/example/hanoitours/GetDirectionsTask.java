@@ -79,9 +79,9 @@ public class GetDirectionsTask extends AsyncTask <ArrayList<GeoPoint>, Integer, 
 		if (arg0.size() < 2)
 				return null;
 		String url = URL + pointToString(arg0.get(0))
-				+ "&destination=" + pointToString(arg0.get(1))
-				+ "&waypoints=optimize:true";
-		for(int i = 2; i < arg0.size(); i++)
+				+ "&destination=" + pointToString(arg0.get(arg0.size()-1))
+				+ "&waypoints=optimize:false";
+		for(int i = 1; i < (arg0.size() - 1); i++)
 			url = url + "%7C" + pointToString(arg0.get(i));
 		url = url + "&sensor=false&mode=driving";
 		return url;
@@ -110,7 +110,8 @@ public class GetDirectionsTask extends AsyncTask <ArrayList<GeoPoint>, Integer, 
 		}catch(JSONException e){
 			Log.e(TAG, "JSONException at requestDirections" + e);
 		}catch(IOException e){
-			Log.e(TAG, "IOException at requestDirections" + e);			
+			Log.e(TAG, "IOException at requestDirections" + e);
+			return requestDirections(url);
 		}
 		return null;
 	}

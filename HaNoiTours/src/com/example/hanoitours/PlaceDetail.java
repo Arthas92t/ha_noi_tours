@@ -1,18 +1,6 @@
 package com.example.hanoitours;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -44,6 +32,7 @@ public class PlaceDetail extends Activity {
 	private Place place;
 	private PlaceList placeList;
 	private AccountManager accountManager;
+	String work;
 	PlaceInfo placeInfo;
 	Account account;
 	Bundle options = new Bundle();
@@ -52,18 +41,37 @@ public class PlaceDetail extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_place_detail);
         placeList = MainActivity.placeList;
         place = placeList.getPlaceList().get(getIntent().getIntExtra("TEST", 0));
         String url = URL + place.id + ".json";
         getInfoTask = new GetPlaceInfoTask(this);
         placeInfo = null;
         getInfoTask.execute(url);
-        if(MainActivity.listGeo.contains(place.point)){
+        showInfo();
+    }
+    
+    public void showInfo(){
+        setContentView(R.layout.activity_place_detail);
+        if(MainActivity.listGeo.mOverlays.contains(place)){
             CheckBox checkBox = (CheckBox) findViewById(R.id.mark_place);
             checkBox.setChecked(true);
         }
-        showDialog(0);
+       	showDialog(0);
+       	if(placeInfo != null){
+       		updateUI(placeInfo);
+       	}
+    }
+
+    public void updateUI(PlaceInfo placeInfo){
+    	dismissDialog(0);
+    	this.placeInfo = placeInfo;
+    	String source = "<b>" + placeInfo.name + "</b><br>";
+    	source = source + "<b>" + placeInfo.address + "</b><br>";
+    	WebView webview = (WebView) findViewById(R.id.place_detail);
+    	webview.loadData(
+    			Html.toHtml(Html.fromHtml(source + placeInfo.info)),
+    			"text/html; charset=utf-8",
+    			null);
     }
 
     @Override
@@ -77,33 +85,46 @@ public class PlaceDetail extends Activity {
     	super.onPause();
     	getInfoTask.cancel(true);
     }
-    
-    public void updateUI(PlaceInfo placeInfo){
-    	dismissDialog(0);
-    	this.placeInfo = placeInfo;
-    	String source = "<b>" + placeInfo.name + "</b><br>";
-    	source = source + "<b>" + placeInfo.address + "</b><br>";
-    	WebView webview = (WebView) findViewById(R.id.place_detail);
-    	webview.loadData(
-    			Html.toHtml(Html.fromHtml(source + placeInfo.info)),
-    			"text/html; charset=utf-8",
-    			null);
-    }
-    
+        
     public void mark(View view){
         CheckBox checkBox = (CheckBox) findViewById(R.id.mark_place);
         if(!checkBox.isChecked()){
-        	MainActivity.listGeo.remove(place.point);
-        	return;
+        	MainActivity.listGeo.remove(place);
+        	MainActivity.map.invalidate();
+            Log.e("aaaaa",""+ MainActivity.listGeo.mOverlays.size());
+            finish();
+            return;
         }
-        MainActivity.listGeo.add(place.point);
+        MainActivity.listGeo.addOverlay(place);
+    	MainActivity.map.invalidate();
+        Log.e("aaaaa",""+ MainActivity.listGeo.mOverlays.size());
         finish();
+    }
+
+    public void showComment(String source){
+    	dismissDialog(2);
+    	setContentView(R.layout.view_comment);
+    	TextView comment = (TextView) findViewById(R.id.comment);
+    	String allComment = 
+    			placeInfo.comment.length() + 
+    			" comments<br>" + 
+    			"Rating: " + placeInfo.rate +"<br>";
+    	allComment = allComment + source.substring(
+    			source.lastIndexOf("Comments:"),
+    			source.lastIndexOf("Rates:"));
+    	allComment = allComment.replaceAll("Destroy", "");
+    	comment.setText(Html.fromHtml(allComment));
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
+        case R.id.menu_show_info:
+        	showInfo();
+        	return true;
         case R.id.menu_view_comment:
-        	showComment();
+        	showDialog(2);
+        	this.work = "comment";
+        	(new GetDataWebTask(this)).execute(place.id);
         	return true;
         case R.id.menu_post_comment:
         	accountManager = AccountManager.get(this);
@@ -116,34 +137,12 @@ public class PlaceDetail extends Activity {
         	account = listAccount[0];
         	setContentView(R.layout.post_comment);
         	showDialog(2);
-        	(new GetRateTask(this)).execute(place.id);
+        	this.work = "rate";
+        	(new GetDataWebTask(this)).execute(place.id);
         	return true;
         default:
             return super.onOptionsItemSelected(item);
     	}
-    }
-    
-    private void showComment(){
-    	if(placeInfo == null)
-    		return;
-    	setContentView(R.layout.view_comment);
-    	TextView comment = (TextView) findViewById(R.id.comment);
-    	String allComment = 
-    			placeInfo.comment.length() + 
-    			" comments\n" + 
-    			"Rating: " + placeInfo.rate +"\n\n";
-    	for(int i = 0; i < placeInfo.comment.length(); i++){
-    		try{
-	    		allComment = allComment + placeInfo.comment.
-	    				getJSONObject(i).
-	    				getString("user_id");
-	    		allComment = allComment + ": " + placeInfo.comment.
-	    				getJSONObject(i).
-	    				getString("content") + "\n";
-    		}catch (Exception e) {
-			}
-    	}
-    	comment.setText(allComment);
     }
     
     public void post(View view){
@@ -160,6 +159,43 @@ public class PlaceDetail extends Activity {
     	showDialog(1);
     }
 
+	@Override
+    protected Dialog onCreateDialog(int id) {
+		progDialog = new ProgressDialog(this);
+		progDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		progDialog.setMessage("Loading...");
+		return progDialog;
+	}
+	
+	public void endPost(){
+		dismissDialog(1);
+		Toast.makeText(PlaceDetail.this, "your comment was posted", Toast.LENGTH_SHORT).show();
+		showInfo();
+	}
+	
+	public void updateRate(String source){
+		Double doubleRate = placeInfo.rate; 
+		try{
+			int i = source.lastIndexOf("Rates:");
+			String flag_account = account.name;
+			
+			i = source.indexOf(flag_account, i);
+			Log.e(TAG, flag_account);
+			String rate = source.substring(
+					i + flag_account.length(),
+					source.indexOf("<",i + flag_account.length()));
+			
+			rate = rate.trim();
+			doubleRate = new Double(rate);
+		}catch(NumberFormatException e){
+			Log.e(TAG, ""+e);
+		}
+
+		float floatRate = (int)(doubleRate* 10);
+    	((RatingBar) findViewById(R.id.input_rate)).setRating(floatRate/10);
+    	dismissDialog(2);		
+	}
+	
 	private class ResetTokenAndPost implements AccountManagerCallback<Bundle> {
 		PlaceDetail activity;
 		String comment;
@@ -220,24 +256,5 @@ public class PlaceDetail extends Activity {
 	    	data.add(rate);    	
 	    	(new PostCommentTask(PlaceDetail.this)).execute(data);
 	    }		
-	}
-	
-	@Override
-    protected Dialog onCreateDialog(int id) {
-		progDialog = new ProgressDialog(this);
-		progDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-		progDialog.setMessage("Loading...");
-		return progDialog;
-	}
-	
-	public void endPost(){
-		dismissDialog(1);
-		finish();
-	}
-	
-	public void updateRate(double rate){
-    	float floatRate = (int)(rate* 10);
-    	((RatingBar) findViewById(R.id.input_rate)).setRating(floatRate/10);
-    	dismissDialog(2);		
-	}
+	}	
 }

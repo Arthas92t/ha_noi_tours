@@ -96,7 +96,7 @@ public class GetPlaceListTask extends AsyncTask <String, Place, Integer>{
 		}catch(JSONException e){
 			Log.e(TAG, "JSONException " + e);
 		}catch(IOException e){
-			Log.e(TAG, "IOException " + e);			
+			download(url);			
 		}
 	}
 

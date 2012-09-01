@@ -14,24 +14,28 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class GetRateTask extends AsyncTask <String, Integer, Double>{
+public class GetDataWebTask extends AsyncTask <String, Integer, String>{
 
 	private String TAG ="GetRateTask";
 	
 	private PlaceDetail currentActivity;
-	public GetRateTask(PlaceDetail activity) {
+	public GetDataWebTask(PlaceDetail activity) {
 		super();
 		this.currentActivity = activity;
 	}
 
 	@Override
-	protected Double doInBackground(String... arg0) {
+	protected String doInBackground(String... arg0) {
 		return getRate(arg0[0]);
 	}
 	
 	@Override
-	protected void onPostExecute(Double result) {
-		currentActivity.updateRate(result);
+	protected void onPostExecute(String result) {
+		if(currentActivity.work == "rate")
+			currentActivity.updateRate(result);
+		if(currentActivity.work == "comment")
+			currentActivity.showComment(result);
+		
 //		(new LoadImageTask(currentActivity)).execute(result.image);
 	}
 	
@@ -55,7 +59,7 @@ public class GetRateTask extends AsyncTask <String, Integer, Double>{
         return content;
 	}
 	
-	private double getRate(String id){
+	private String getRate(String id){
 		HttpClient client = new DefaultHttpClient();
 		id = "http://hanoitour.herokuapp.com/places/" +  id;
 		HttpGet httpget = new HttpGet(id);
@@ -65,23 +69,9 @@ public class GetRateTask extends AsyncTask <String, Integer, Double>{
 			HttpEntity entity = response.getEntity();
 			String source = streamToString(entity.getContent());
 			//need to be edited
-			
-			int i = source.lastIndexOf("Rates:");
-			String flag_account = currentActivity.account.name;
-			
-			i = source.indexOf(flag_account, i);
-			Log.e(TAG, flag_account);
-			String rate = source.substring(
-					i + flag_account.length(),
-					source.indexOf("<",i + flag_account.length()));
-			
-			rate = rate.trim();
-			return (new Double(rate));
-		}catch(NumberFormatException e){
-			Log.e(TAG, ""+e);			
+			return(source);
 		}catch(Exception e){
-			Log.e(TAG, ""+e);						
+			return getRate(id);						
 		}
-		return currentActivity.placeInfo.rate;
 	}
 }

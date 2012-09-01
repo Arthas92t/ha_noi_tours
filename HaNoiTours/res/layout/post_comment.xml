@@ -2,22 +2,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
-
+    
+    <TextView 
+        android:layout_centerHorizontal="true"
+        android:padding="@dimen/padding_medium"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="comment:"
+        android:id="@+id/title_comment"/>
     <EditText
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:padding="@dimen/padding_medium"
         android:text=""
+        android:layout_below="@id/title_comment"
         android:id="@+id/input_comment"/>
     <RatingBar
-        android:max="5"
+        android:numStars="5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/input_comment"
-        android:padding="@dimen/padding_medium"
-        android:text=""
         android:id="@+id/input_rate"/>
     <Button
         android:layout_width="wrap_content"

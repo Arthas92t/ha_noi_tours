@@ -84,7 +84,7 @@ public class GetPlaceInfoTask extends AsyncTask <String, Integer, PlaceInfo>{
 		}catch(JSONException e){
 			Log.e(TAG, "JSONException " + e);
 		}catch(IOException e){
-			Log.e(TAG, "IOException " + e);			
+			return download(url);
 		}
 		return null;
 	}
